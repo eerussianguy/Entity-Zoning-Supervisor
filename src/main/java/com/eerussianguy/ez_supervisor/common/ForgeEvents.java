@@ -10,6 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraftforge.common.MinecraftForge;
@@ -79,11 +80,14 @@ public class ForgeEvents
             final int count = stack.getCount();
 
             Objects.requireNonNull(EZSupervisor.entityLootFilters).forEach(filter -> {
-                if (filter.ingredient().test(stack))
+                if ((filter.entities().isEmpty() || filter.entities().contains(entity.getType())) && filter.ingredient().test(stack))
                 {
                     entity.setItem(ItemStack.EMPTY);
                     entity.discard();
-                    deadEntity.spawnAtLocation(new ItemStack(filter.output(), Mth.ceil(filter.outputMultiplier() * count)));
+                    if (filter.output() != Items.AIR)
+                    {
+                        deadEntity.spawnAtLocation(new ItemStack(filter.output(), Mth.ceil(filter.outputMultiplier() * count)));
+                    }
                 }
             });
         }

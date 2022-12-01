@@ -106,6 +106,11 @@ public class ParsingUtils
         return Objects.requireNonNull(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(name)));
     }
 
+    public static Item getAsItem(JsonObject json, String key, Item fallback)
+    {
+        return json.has(key) ? getAsItem(json, key) : fallback;
+    }
+
     public static Item getAsItem(JsonObject json, String key)
     {
         final String str = GsonHelper.getAsString(json, key);
