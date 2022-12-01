@@ -123,14 +123,13 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly fg.deobf("curse.maven:tfc-302973:${tfc_identifier}")
+    runtimeOnly fg.deobf("curse.maven:tfc-302973:${tfc_identifier}")
+    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
 
 
     if (System.getProperty("idea.sync.active") != "true") {
         annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
     }
-
-    // Patchouli
-    compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
 
     // JEI
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}:api")
