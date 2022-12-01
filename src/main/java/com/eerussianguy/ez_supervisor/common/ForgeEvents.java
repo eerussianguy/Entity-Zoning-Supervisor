@@ -6,13 +6,18 @@ import com.eerussianguy.ez_supervisor.EZSupervisor;
 import com.eerussianguy.ez_supervisor.common.data.SpawnPredicate;
 import com.eerussianguy.ez_supervisor.common.data.SpawnRestriction;
 import com.mojang.logging.LogUtils;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import org.slf4j.Logger;
 
@@ -24,8 +29,9 @@ public class ForgeEvents
     {
         final IEventBus bus = MinecraftForge.EVENT_BUS;
 
-        bus.addListener(ForgeEvents::onBiomeLoad);
-        bus.addListener(ForgeEvents::onCheckSpawn);
+        bus.addListener(EventPriority.LOW, ForgeEvents::onBiomeLoad);
+        bus.addListener(EventPriority.LOW, ForgeEvents::onCheckSpawn);
+        bus.addListener(EventPriority.LOW, ForgeEvents::onEntityLoot);
     }
 
     public static void onBiomeLoad(BiomeLoadingEvent event)
@@ -61,6 +67,25 @@ public class ForgeEvents
                 }
             }
 
+        }
+    }
+
+    public static void onEntityLoot(LivingDropsEvent event)
+    {
+        final LivingEntity deadEntity = event.getEntityLiving();
+        for (ItemEntity entity : event.getDrops())
+        {
+            final ItemStack stack = entity.getItem();
+            final int count = stack.getCount();
+
+            Objects.requireNonNull(EZSupervisor.entityLootFilters).forEach(filter -> {
+                if (filter.ingredient().test(stack))
+                {
+                    entity.setItem(ItemStack.EMPTY);
+                    entity.discard();
+                    deadEntity.spawnAtLocation(new ItemStack(filter.output(), Mth.ceil(filter.outputMultiplier() * count)));
+                }
+            });
         }
     }
 }

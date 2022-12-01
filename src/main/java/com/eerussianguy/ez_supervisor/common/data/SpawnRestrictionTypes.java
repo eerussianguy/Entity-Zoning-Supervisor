@@ -3,6 +3,7 @@ package com.eerussianguy.ez_supervisor.common.data;
 import java.util.Objects;
 import java.util.function.Function;
 import com.eerussianguy.ez_supervisor.EZSupervisor;
+import com.eerussianguy.ez_supervisor.common.ParsingUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
@@ -72,7 +73,7 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getSpawnType(JsonObject json)
     {
-        final MobSpawnType reason = EZSupervisor.getEnum(json.get("type"), MobSpawnType.class);
+        final MobSpawnType reason = ParsingUtils.getEnum(json.get("type"), MobSpawnType.class);
         return (entity, level, type, pos, random) -> type == reason;
     }
 
@@ -166,8 +167,8 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getDifficulty(JsonObject json)
     {
-        final int min = EZSupervisor.getEnum(json, "min", Difficulty.class, Difficulty.PEACEFUL).ordinal();
-        final int max = EZSupervisor.getEnum(json, "max", Difficulty.class, Difficulty.HARD).ordinal();
+        final int min = ParsingUtils.getEnum(json, "min", Difficulty.class, Difficulty.PEACEFUL).ordinal();
+        final int max = ParsingUtils.getEnum(json, "max", Difficulty.class, Difficulty.HARD).ordinal();
         return ((entity, level, type, pos, random) -> level.getDifficulty().ordinal() >= min && level.getDifficulty().ordinal() <= max);
     }
 

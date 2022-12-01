@@ -15,6 +15,7 @@ import net.dries007.tfc.world.chunkdata.ChunkData;
 import net.dries007.tfc.world.chunkdata.ChunkDataProvider;
 import net.dries007.tfc.world.placement.ClimatePlacement;
 
+@SuppressWarnings("unused")
 public class TFCIntegration
 {
     public static void init() {}
