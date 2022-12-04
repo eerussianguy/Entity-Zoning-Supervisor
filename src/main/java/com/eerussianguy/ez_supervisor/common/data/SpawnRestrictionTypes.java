@@ -143,7 +143,7 @@ public class SpawnRestrictionTypes
     public static SpawnPredicate getPlayerDistance(JsonObject json)
     {
         final int min = GsonHelper.getAsInt(json, "min", 0);
-        final int max = GsonHelper.getAsInt(json, "max", -1);
+        final int max = GsonHelper.getAsInt(json, "max", 64);
         return (entity, level, type, pos, random) -> {
             final Player player = level.getNearestPlayer(entity, max);
             if (player != null && !player.isSpectator())
@@ -157,11 +157,11 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getDayTime(JsonObject json)
     {
-        final int minTicks = GsonHelper.getAsInt(json, "min");
-        final int maxTicks = GsonHelper.getAsInt(json, "max");
+        final int minTicks = GsonHelper.getAsInt(json, "min", 0);
+        final int maxTicks = GsonHelper.getAsInt(json, "max", 24000);
         return ((entity, level, type, pos, random) -> {
             final long current = level.dayTime() % 24000L;
-            return current > minTicks && current < maxTicks;
+            return current >= minTicks && current <= maxTicks;
         });
     }
 

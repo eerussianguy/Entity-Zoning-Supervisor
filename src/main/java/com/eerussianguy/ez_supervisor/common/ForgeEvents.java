@@ -1,14 +1,19 @@
 package com.eerussianguy.ez_supervisor.common;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import com.eerussianguy.ez_supervisor.EZSupervisor;
+import com.eerussianguy.ez_supervisor.common.data.LootFilter;
 import com.eerussianguy.ez_supervisor.common.data.SpawnPredicate;
 import com.eerussianguy.ez_supervisor.common.data.SpawnRestriction;
 import com.mojang.logging.LogUtils;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -73,6 +78,7 @@ public class ForgeEvents
 
     public static void onEntityLoot(LivingDropsEvent event)
     {
+        final Set<LootFilter> usedNoIngredientFilters = new HashSet<>();
         final LivingEntity deadEntity = event.getEntityLiving();
         for (ItemEntity entity : event.getDrops())
         {
@@ -80,13 +86,24 @@ public class ForgeEvents
             final int count = stack.getCount();
 
             Objects.requireNonNull(EZSupervisor.entityLootFilters).forEach(filter -> {
-                if ((filter.entities().isEmpty() || filter.entities().contains(entity.getType())) && filter.ingredient().test(stack))
+                if (filter.ingredient() == null)
                 {
-                    entity.setItem(ItemStack.EMPTY);
-                    entity.discard();
-                    if (filter.output() != Items.AIR)
+                    if (filter.output() != Items.AIR && !usedNoIngredientFilters.contains(filter))
                     {
-                        deadEntity.spawnAtLocation(new ItemStack(filter.output(), Mth.ceil(filter.outputMultiplier() * count)));
+                        usedNoIngredientFilters.add(filter);
+                        deadEntity.spawnAtLocation(new ItemStack(filter.output(), Mth.ceil(filter.outputMultiplier())));
+                    }
+                }
+                else if ((filter.entities().isEmpty() || filter.entities().contains(entity.getType())) && filter.ingredient().test(stack))
+                {
+                    if (!filter.killedByPlayer() || (event.getSource() instanceof EntityDamageSource source && source.getEntity() instanceof Player))
+                    {
+                        entity.setItem(ItemStack.EMPTY);
+                        entity.discard();
+                        if (filter.output() != Items.AIR)
+                        {
+                            deadEntity.spawnAtLocation(new ItemStack(filter.output(), Mth.ceil(filter.outputMultiplier() * count)));
+                        }
                     }
                 }
             });
