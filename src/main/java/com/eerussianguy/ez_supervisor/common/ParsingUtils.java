@@ -2,9 +2,11 @@ package com.eerussianguy.ez_supervisor.common;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +15,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -31,15 +35,16 @@ import net.dries007.tfc.util.JsonHelpers;
 public class ParsingUtils
 {
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Gson GSON = new GsonBuilder().create();
 
     public static JsonObject readJsonObject(File parent, String name)
     {
-        return readJson(parent, name, GsonHelper::parse, new JsonObject());
+        return readJson(parent, name, reader -> GsonHelper.fromJson(GSON, reader, JsonObject.class, true), new JsonObject());
     }
 
     public static JsonArray readJsonArray(File parent, String name)
     {
-        return readJson(parent, name, GsonHelper::parseArray, new JsonArray());
+        return readJson(parent, name, reader -> GsonHelper.fromJson(GSON, reader, JsonArray.class, true), new JsonArray());
     }
 
     public static <T> T readJson(File parent, String name, Function<Reader, T> mapper, T defaultValue)
@@ -49,6 +54,15 @@ public class ParsingUtils
         {
             if (file.createNewFile())
             {
+                try (PrintWriter stream = new PrintWriter(new FileOutputStream(file)))
+                {
+                    stream.print(defaultValue instanceof JsonObject ? "{}" : "[]");
+                    stream.flush();
+                }
+                catch (IOException e)
+                {
+                    LOGGER.error("Error creating default file at + " + name);
+                }
                 LOGGER.debug("Created config file named: " + name + ".json");
                 return defaultValue;
             }
