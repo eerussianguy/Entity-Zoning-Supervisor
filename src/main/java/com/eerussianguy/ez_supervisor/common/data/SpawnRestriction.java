@@ -12,14 +12,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 
-public record SpawnRestriction(List<SpawnPredicate> predicates)
+public record SpawnRestriction(List<SpawnPredicate> predicates, boolean wipeOriginal)
 {
     public static Map<EntityType<?>, SpawnRestriction> readAll(JsonArray array)
     {
         return ParsingUtils.mapArrayMap(array, e -> create(e.getAsJsonObject()), e -> ParsingUtils.getAsEntity(e.getAsJsonObject()));
     }
 
-    public static  Map<String, SpawnRestriction> readRuleSets(JsonObject json)
+    public static Map<String, SpawnRestriction> readRuleSets(JsonObject json)
     {
         final Map<String, SpawnRestriction> map = new HashMap<>();
         for (Map.Entry<String, JsonElement> entry : json.entrySet())
@@ -40,6 +40,7 @@ public record SpawnRestriction(List<SpawnPredicate> predicates)
             final SpawnRestrictionType type = SpawnRestrictionType.getValueOrThrow(id);
             list.add(type.deserializer().apply(predicateJson));
         }
-        return new SpawnRestriction(list);
+        final boolean wipe = GsonHelper.getAsBoolean(json, "overwrite_mod_predicate", false);
+        return new SpawnRestriction(list, wipe);
     }
 }
