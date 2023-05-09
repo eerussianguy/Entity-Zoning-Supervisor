@@ -37,7 +37,6 @@ public class TFCIntegration
     public static SpawnPredicate getClimate(JsonObject json)
     {
         final ClimatePlacement placement = JsonHelpers.decodeCodec(json, ClimatePlacement.CODEC, "climate");
-        final String dim = GsonHelper.getAsString(json, "dimension", "minecraft:overworld");
         return ((entity, level, type, pos, random) -> {
             if (!(level.getLevel().getChunkSource().getGenerator() instanceof TFCChunkGenerator))
             {
