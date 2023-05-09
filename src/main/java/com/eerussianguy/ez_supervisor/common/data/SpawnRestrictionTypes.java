@@ -1,5 +1,6 @@
 package com.eerussianguy.ez_supervisor.common.data;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import com.eerussianguy.ez_supervisor.EZSupervisor;
@@ -27,6 +28,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import static com.eerussianguy.ez_supervisor.common.ParsingUtils.*;
+
 @SuppressWarnings("unused")
 public class SpawnRestrictionTypes
 {
@@ -51,6 +54,9 @@ public class SpawnRestrictionTypes
     public static final SpawnRestrictionType SPAWN_TYPE = register("spawn_type", SpawnRestrictionTypes::getSpawnType);
     public static final SpawnRestrictionType RULE_SET = register("rule_set", SpawnRestrictionTypes::getRuleSet);
     public static final SpawnRestrictionType BIOME_TAG = register("biome_tag", SpawnRestrictionTypes::getBiomeTag);
+    public static final SpawnRestrictionType OR = register("or", SpawnRestrictionTypes::getOr);
+    public static final SpawnRestrictionType AND = register("and", SpawnRestrictionTypes::getOr);
+    public static final SpawnRestrictionType COPY = register("copy", SpawnRestrictionTypes::getCopy);
 
     // Vanilla
     public static final SpawnRestrictionType MOB = register("mob", SpawnRestrictionTypes::getMob, true);
@@ -58,6 +64,51 @@ public class SpawnRestrictionTypes
     public static final SpawnRestrictionType ANIMAL = register("animal", SpawnRestrictionTypes::getAnimal, true);
 
     public static void init() {}
+
+    public static SpawnPredicate getOr(JsonObject json)
+    {
+        final List<SpawnPredicate> predicates = SpawnRestriction.readPredicatesList(json);
+        return (entity, level, type, pos, random) -> {
+            for (SpawnPredicate predicate : predicates)
+            {
+                if (predicate.test(entity, level, type, pos, random))
+                {
+                    return true;
+                }
+            }
+            return false;
+        };
+    }
+
+    public static SpawnPredicate getAnd(JsonObject json)
+    {
+        final List<SpawnPredicate> predicates = SpawnRestriction.readPredicatesList(json);
+        return (entity, level, type, pos, random) -> {
+            for (SpawnPredicate predicate : predicates)
+            {
+                if (!predicate.test(entity, level, type, pos, random))
+                {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }
+
+    public static SpawnPredicate getCopy(JsonObject json)
+    {
+        final EntityType<?> toCopy = ParsingUtils.getAsEntity(json);
+        return (entity, level, type, pos, random) -> {
+            for (SpawnPredicate predicate : Objects.requireNonNull(EZSupervisor.restrictions).get(toCopy).predicates())
+            {
+                if (!predicate.test(entity, level, type, pos, random))
+                {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }
 
     public static SpawnPredicate getBiomeTag(JsonObject json)
     {
@@ -73,7 +124,7 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getSpawnType(JsonObject json)
     {
-        final MobSpawnType reason = ParsingUtils.getEnum(json.get("type"), MobSpawnType.class);
+        final MobSpawnType reason = ParsingUtils.getEnum(json.get("reason"), MobSpawnType.class);
         return (entity, level, type, pos, random) -> type == reason;
     }
 
@@ -106,9 +157,10 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getSlimeChunk(JsonObject json)
     {
+        final int rarity = GsonHelper.getAsInt(json, "rarity", 10);
         return (entity, level, type, pos, random) -> {
             final ChunkPos chunkpos = new ChunkPos(pos);
-            return WorldgenRandom.seedSlimeChunk(chunkpos.x, chunkpos.z, level.getLevel().getSeed(), 987234911L).nextInt(10) == 0;
+            return WorldgenRandom.seedSlimeChunk(chunkpos.x, chunkpos.z, level.getLevel().getSeed(), 987234911L).nextInt(rarity) == 0;
         };
     }
 

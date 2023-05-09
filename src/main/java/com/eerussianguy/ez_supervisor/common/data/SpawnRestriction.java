@@ -29,7 +29,7 @@ public record SpawnRestriction(List<SpawnPredicate> predicates, boolean wipeOrig
         return map;
     }
 
-    public static SpawnRestriction create(JsonObject json)
+    public static List<SpawnPredicate> readPredicatesList(JsonObject json)
     {
         final List<SpawnPredicate> list = new ArrayList<>();
         final JsonArray predicates = GsonHelper.getAsJsonArray(json, "predicates");
@@ -40,7 +40,12 @@ public record SpawnRestriction(List<SpawnPredicate> predicates, boolean wipeOrig
             final SpawnRestrictionType type = SpawnRestrictionType.getValueOrThrow(id);
             list.add(type.deserializer().apply(predicateJson));
         }
+        return list;
+    }
+
+    public static SpawnRestriction create(JsonObject json)
+    {
         final boolean wipe = GsonHelper.getAsBoolean(json, "overwrite_mod_predicate", false);
-        return new SpawnRestriction(list, wipe);
+        return new SpawnRestriction(readPredicatesList(json), wipe);
     }
 }

@@ -14,12 +14,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.ChunkPos;
 
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.JsonHelpers;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.calendar.Season;
+import net.dries007.tfc.world.TFCChunkGenerator;
 import net.dries007.tfc.world.chunkdata.ChunkData;
 import net.dries007.tfc.world.chunkdata.ChunkDataProvider;
 import net.dries007.tfc.world.chunkdata.ForestType;
@@ -35,7 +37,12 @@ public class TFCIntegration
     public static SpawnPredicate getClimate(JsonObject json)
     {
         final ClimatePlacement placement = JsonHelpers.decodeCodec(json, ClimatePlacement.CODEC, "climate");
+        final String dim = GsonHelper.getAsString(json, "dimension", "minecraft:overworld");
         return ((entity, level, type, pos, random) -> {
+            if (!(level.getLevel().getChunkSource().getGenerator() instanceof TFCChunkGenerator))
+            {
+                return true;
+            }
             final ChunkData data = level instanceof WorldGenRegion region
                 ? ChunkDataProvider.get(region).get(new ChunkPos(pos))
                 : ChunkData.get(level, pos);
