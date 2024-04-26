@@ -16,7 +16,7 @@ public class ClientForgeEvents
         bus.addListener(ClientForgeEvents::onScreen);
     }
 
-    private static void onScreen(ScreenEvent.InitScreenEvent.Pre event)
+    private static void onScreen(ScreenEvent.Init.Pre event)
     {
         if (event.getScreen() instanceof TitleScreen)
         {
