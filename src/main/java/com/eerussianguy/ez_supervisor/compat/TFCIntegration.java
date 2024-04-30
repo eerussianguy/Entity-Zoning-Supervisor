@@ -15,6 +15,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 
 import net.dries007.tfc.util.Helpers;
@@ -100,7 +101,7 @@ public class TFCIntegration
             this.fuzzy = fuzzy;
         }
 
-        public boolean isValid(ChunkData data, BlockPos pos, Random random)
+        public boolean isValid(ChunkData data, BlockPos pos, RandomSource random)
         {
             final float temperature = data.getAverageTemp(pos);
             final float rainfall = data.getRainfall(pos);

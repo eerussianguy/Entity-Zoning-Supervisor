@@ -61,9 +61,9 @@ public class ParsingUtils
                 }
                 catch (IOException e)
                 {
-                    LOGGER.error("Error creating default file at + " + name);
+                    LOGGER.error("Error creating default file at + {}", name);
                 }
-                LOGGER.debug("Created config file named: " + name + ".json");
+                LOGGER.debug("Created config file named: {}.json", name);
                 return defaultValue;
             }
             else
@@ -112,12 +112,12 @@ public class ParsingUtils
 
     public static EntityType<?> getAsEntity(JsonObject json)
     {
-        return Objects.requireNonNull(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(GsonHelper.getAsString(json, "entity"))));
+        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(GsonHelper.getAsString(json, "entity"))));
     }
 
     public static EntityType<?> getAsEntity(String name)
     {
-        return Objects.requireNonNull(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(name)));
+        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(name)));
     }
 
     public static Item getAsItem(JsonObject json, String key, Item fallback)

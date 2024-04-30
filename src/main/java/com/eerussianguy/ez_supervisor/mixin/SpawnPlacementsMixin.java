@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Random;
 import com.eerussianguy.ez_supervisor.EZSupervisor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -20,7 +21,7 @@ public abstract class SpawnPlacementsMixin
 {
 
     @Inject(method = "checkSpawnRules", at = @At("HEAD"), cancellable = true)
-    private static void inject$checkSpawnRules(EntityType<Entity> entity, ServerLevelAccessor level, MobSpawnType reason, BlockPos pos, Random rand, CallbackInfoReturnable<Boolean> cir)
+    private static void inject$checkSpawnRules(EntityType<Entity> entity, ServerLevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource rand, CallbackInfoReturnable<Boolean> cir)
     {
         if (Objects.requireNonNull(EZSupervisor.restrictions).containsKey(entity) && EZSupervisor.restrictions.get(entity).wipeOriginal())
         {
