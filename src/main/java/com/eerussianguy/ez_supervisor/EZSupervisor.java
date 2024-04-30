@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import com.eerussianguy.ez_supervisor.client.ClientForgeEvents;
-import com.eerussianguy.ez_supervisor.client.ClientModEvents;
 import com.eerussianguy.ez_supervisor.common.ForgeEvents;
 import com.eerussianguy.ez_supervisor.common.ParsingUtils;
 import com.eerussianguy.ez_supervisor.common.SpawnModifierProvider;
@@ -53,7 +52,6 @@ public class EZSupervisor
         if (FMLEnvironment.dist == Dist.CLIENT)
         {
             ClientForgeEvents.init();
-            ClientModEvents.init();
         }
         ForgeEvents.init();
         BIOME_MODIFIER_SERIALIZERS.register(FMLJavaModLoadingContext.get().getModEventBus());

@@ -74,7 +74,7 @@ public class ForgeEvents
                 }
                 else if ((filter.entities().isEmpty() || filter.entities().contains(entity.getType())) && filter.ingredient().test(stack))
                 {
-                    if (!filter.killedByPlayer() || (event.getSource()/* instanceof EntityDamageSource source && source*/.getEntity() instanceof Player))
+                    if (!filter.killedByPlayer() || (event.getSource().getEntity() instanceof Player))
                     {
                         entity.setItem(ItemStack.EMPTY);
                         entity.discard();
