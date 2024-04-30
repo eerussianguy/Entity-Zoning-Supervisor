@@ -28,8 +28,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import static com.eerussianguy.ez_supervisor.common.ParsingUtils.*;
-
 @SuppressWarnings("unused")
 public class SpawnRestrictionTypes
 {
@@ -244,7 +242,7 @@ public class SpawnRestrictionTypes
     public static SpawnPredicate getMonster(JsonObject json)
     {
         final boolean anyLight = GsonHelper.getAsBoolean(json, "any_light", false);
-        return (entity, level, type, pos, rand) ->{
+        return (entity, level, type, pos, rand) -> {
             return entity instanceof Monster && anyLight
                 ? Monster.checkAnyLightMonsterSpawnRules((EntityType<? extends Monster>) entity.getType(), level, type, pos, rand)
                 : Monster.checkMonsterSpawnRules((EntityType<? extends Monster>) entity.getType(), level, type, pos, rand);
@@ -261,7 +259,7 @@ public class SpawnRestrictionTypes
     @SuppressWarnings("unchecked")
     public static SpawnPredicate getMob(JsonObject json)
     {
-        return (entity, level, type, pos, rand) -> entity instanceof Mob &&  Mob.checkMobSpawnRules((EntityType<? extends Mob>) entity.getType(), level, type, pos, rand);
+        return (entity, level, type, pos, rand) -> entity instanceof Mob && Mob.checkMobSpawnRules((EntityType<? extends Mob>) entity.getType(), level, type, pos, rand);
     }
 
     public static SpawnPredicate getBrightness(JsonObject json)

@@ -1,8 +1,6 @@
 package com.eerussianguy.ez_supervisor.mixin;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import com.eerussianguy.ez_supervisor.EZSupervisor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;

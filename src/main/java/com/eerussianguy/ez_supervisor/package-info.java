@@ -10,6 +10,5 @@
 package com.eerussianguy.ez_supervisor;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
