@@ -3,15 +3,15 @@ package com.eerussianguy.ez_supervisor.client;
 
 import com.eerussianguy.ez_supervisor.EZSupervisor;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 public class ClientForgeEvents
 {
     public static void init()
     {
-        final IEventBus bus = MinecraftForge.EVENT_BUS;
+        final IEventBus bus = NeoForge.EVENT_BUS;
 
         bus.addListener(ClientForgeEvents::onScreen);
     }

@@ -18,7 +18,7 @@ public record BiomeSpawn(List<EntityType<?>> types, List<ResourceLocation> biome
     public static BiomeSpawn create(JsonObject json)
     {
         final List<EntityType<?>> mobs = ParsingUtils.getAsEntityList(json);
-        final List<ResourceLocation> biomes = !json.has("biomes") ? List.of() : ParsingUtils.mapArray(json.getAsJsonArray("biomes"), e -> new ResourceLocation(e.getAsString()));
+        final List<ResourceLocation> biomes = !json.has("biomes") ? List.of() : ParsingUtils.mapArray(json.getAsJsonArray("biomes"), e -> ResourceLocation.parse(e.getAsString()));
         final int minCount = GsonHelper.getAsInt(json, "min_count", 1);
         final int maxCount = GsonHelper.getAsInt(json, "max_count", 4);
         final int weight = GsonHelper.getAsInt(json, "weight", 1);

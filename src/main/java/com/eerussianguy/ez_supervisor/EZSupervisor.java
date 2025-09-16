@@ -13,27 +13,27 @@ import com.eerussianguy.ez_supervisor.common.data.SpawnRestriction;
 import com.eerussianguy.ez_supervisor.common.data.SpawnRestrictionTypes;
 import com.eerussianguy.ez_supervisor.compat.TFCIntegration;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.world.BiomeModifier;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 @Mod(EZSupervisor.MOD_ID)
 public class EZSupervisor
 {
-    private static final Logger LOGGER = LogUtils.getLogger();
     public static final String MOD_ID = "ez_supervisor";
 
     @Nullable public static File configDir = null;
@@ -43,20 +43,20 @@ public class EZSupervisor
     @Nullable public static List<LootFilter> entityLootFilters = null;
     public static boolean tfc = false;
 
-    private static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS = DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MOD_ID);
+    private static final DeferredRegister<MapCodec<? extends BiomeModifier>> BIOME_MODIFIER_SERIALIZERS = DeferredRegister.create(NeoForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MOD_ID);
 
-    public static final RegistryObject<Codec<SpawnModifierProvider>> ADD_EZ_SPAWNS_BIOME_MODIFIER_TYPE = BIOME_MODIFIER_SERIALIZERS.register("add_ez_spawns", () -> Codec.unit(SpawnModifierProvider.INSTANCE));
+    public static final DeferredHolder<MapCodec<? extends BiomeModifier>, MapCodec<SpawnModifierProvider>> ADD_EZ_SPAWNS_BIOME_MODIFIER_TYPE = BIOME_MODIFIER_SERIALIZERS.register("add_ez_spawns", () -> MapCodec.unit(SpawnModifierProvider.INSTANCE));
 
-    public EZSupervisor()
+    public EZSupervisor(ModContainer mod, IEventBus bus)
     {
         if (FMLEnvironment.dist == Dist.CLIENT)
         {
             ClientForgeEvents.init();
         }
         ForgeEvents.init();
-        BIOME_MODIFIER_SERIALIZERS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        BIOME_MODIFIER_SERIALIZERS.register(bus);
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(EZSupervisor::setup);
+        bus.addListener(EZSupervisor::setup);
     }
 
     public static void setup(FMLCommonSetupEvent event)
@@ -108,7 +108,7 @@ public class EZSupervisor
 
     public static ResourceLocation identifier(String path)
     {
-        return new ResourceLocation(EZSupervisor.MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(EZSupervisor.MOD_ID, path);
     }
 
 }

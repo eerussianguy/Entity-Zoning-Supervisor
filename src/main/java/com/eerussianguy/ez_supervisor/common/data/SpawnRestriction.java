@@ -36,7 +36,7 @@ public record SpawnRestriction(List<SpawnPredicate> predicates, boolean wipeOrig
         for (JsonElement element : predicates)
         {
             final JsonObject predicateJson = element.getAsJsonObject();
-            final ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(predicateJson, "type"));
+            final ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(predicateJson, "type"));
             final SpawnRestrictionType type = SpawnRestrictionType.getValueOrThrow(id);
             list.add(type.deserializer().apply(predicateJson));
         }

@@ -5,6 +5,7 @@ import com.eerussianguy.ez_supervisor.common.ParsingUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -26,7 +27,7 @@ public record LootFilter(List<EntityType<?>> entities, @Nullable Ingredient ingr
         if (json.has("ingredient"))
         {
             final JsonElement ingredientJson = json.get("ingredient");
-            ingredient = ingredientJson.isJsonPrimitive() ? Ingredient.of(ParsingUtils.getAsItem(json, "ingredient")) : Ingredient.fromJson(ingredientJson);
+            ingredient = ingredientJson.isJsonPrimitive() ? Ingredient.of(ParsingUtils.getAsItem(json, "ingredient")) : Ingredient.CODEC.decode(JsonOps.INSTANCE, ingredientJson).getOrThrow().getFirst();
         }
         else
         {

@@ -2,18 +2,17 @@ package com.eerussianguy.ez_supervisor.common;
 
 import com.eerussianguy.ez_supervisor.EZSupervisor;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.common.world.MobSpawnSettingsBuilder;
-import net.minecraftforge.common.world.ModifiableBiomeInfo;
+import net.neoforged.neoforge.common.world.BiomeModifier;
+import net.neoforged.neoforge.common.world.MobSpawnSettingsBuilder;
+import net.neoforged.neoforge.common.world.ModifiableBiomeInfo;
 import org.slf4j.Logger;
 
 public record SpawnModifierProvider() implements BiomeModifier
 {
-
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final SpawnModifierProvider INSTANCE = new SpawnModifierProvider();
 
@@ -39,7 +38,7 @@ public record SpawnModifierProvider() implements BiomeModifier
 
 
     @Override
-    public Codec<? extends BiomeModifier> codec()
+    public MapCodec<? extends BiomeModifier> codec()
     {
         return EZSupervisor.ADD_EZ_SPAWNS_BIOME_MODIFIER_TYPE.get();
     }

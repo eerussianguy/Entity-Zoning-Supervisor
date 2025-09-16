@@ -22,15 +22,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
-
-import net.dries007.tfc.util.JsonHelpers;
 
 public class ParsingUtils
 {
@@ -112,12 +112,12 @@ public class ParsingUtils
 
     public static EntityType<?> getAsEntity(JsonObject json)
     {
-        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(GsonHelper.getAsString(json, "entity"))));
+        return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(GsonHelper.getAsString(json, "entity"))));
     }
 
     public static EntityType<?> getAsEntity(String name)
     {
-        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(name)));
+        return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(name)));
     }
 
     public static Item getAsItem(JsonObject json, String key, Item fallback)
@@ -128,12 +128,17 @@ public class ParsingUtils
     public static Item getAsItem(JsonObject json, String key)
     {
         final String str = GsonHelper.getAsString(json, key);
-        final Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(str));
-        if (item == null || item == Items.AIR)
+        final Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(str));
+        if (item == Items.AIR)
         {
             throw new JsonParseException("Invalid item string passed to loot filter: " + str);
         }
         return item;
+    }
+
+    public static <T> T decodeCodec(Codec<T> codec, JsonElement json)
+    {
+        return codec.decode(JsonOps.INSTANCE, json).getOrThrow().getFirst();
     }
 
     public static <E extends Enum<E>> E getEnum(JsonObject obj, String key, Class<E> enumClass, E defaultValue)
@@ -147,7 +152,7 @@ public class ParsingUtils
 
     public static <E extends Enum<E>> E getEnum(JsonElement json, Class<E> enumClass)
     {
-        final String enumName = JsonHelpers.convertToString(json, enumClass.getSimpleName());
+        final String enumName = GsonHelper.convertToString(json, enumClass.getSimpleName());
         try
         {
             return Enum.valueOf(enumClass, enumName.toUpperCase(Locale.ROOT));

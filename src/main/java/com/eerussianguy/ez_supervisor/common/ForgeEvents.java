@@ -14,19 +14,18 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 
 public class ForgeEvents
 {
 
     public static void init()
     {
-        final IEventBus bus = MinecraftForge.EVENT_BUS;
+        final IEventBus bus = NeoForge.EVENT_BUS;
 
         bus.addListener(EventPriority.LOW, ForgeEvents::onCheckSpawn);
         bus.addListener(EventPriority.LOW, ForgeEvents::onEntityLoot);
@@ -45,7 +44,7 @@ public class ForgeEvents
                 {
                     if (!predicate.test(entity, server, event.getSpawnType(), entity.blockPosition(), entity.getRandom()))
                     {
-                        event.setResult(Event.Result.DENY);
+                        event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
                         break;
                     }
                 }

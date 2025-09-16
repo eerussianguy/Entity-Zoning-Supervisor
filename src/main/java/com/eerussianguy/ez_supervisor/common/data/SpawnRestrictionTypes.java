@@ -8,6 +8,8 @@ import com.eerussianguy.ez_supervisor.common.ParsingUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -25,8 +27,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
 
 @SuppressWarnings("unused")
 public class SpawnRestrictionTypes
@@ -110,7 +111,7 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getBiomeTag(JsonObject json)
     {
-        final TagKey<Biome> tag = TagKey.create(ForgeRegistries.Keys.BIOMES, new ResourceLocation(GsonHelper.getAsString(json, "tag")));
+        final TagKey<Biome> tag = TagKey.create(Registries.BIOME, ResourceLocation.parse(GsonHelper.getAsString(json, "tag")));
         return (entity, level, type, pos, random) -> level.getBiome(pos).is(tag);
     }
 
@@ -128,8 +129,7 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getFluid(JsonObject json)
     {
-        final Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(GsonHelper.getAsString(json, "fluid")));
-        if (fluid == null) throw new JsonParseException("Could not find fluid: " + GsonHelper.getAsJsonArray(json, "fluid"));
+        final Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(GsonHelper.getAsString(json, "fluid")));
         return (entity, level, type, pos, random) -> level.getBlockState(pos).getFluidState().is(fluid);
     }
 
@@ -170,8 +170,8 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getBlock(JsonObject json)
     {
-        final Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(GsonHelper.getAsString(json, "block")));
-        if (block == null || block == Blocks.AIR)
+        final Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(GsonHelper.getAsString(json, "block")));
+        if (block == Blocks.AIR)
         {
             throw new JsonParseException("Air or unknown block passed to block predicate");
         }
@@ -180,7 +180,7 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getTag(JsonObject json)
     {
-        final TagKey<Block> tag = TagKey.create(ForgeRegistries.Keys.BLOCKS, new ResourceLocation(GsonHelper.getAsString(json, "tag")));
+        final TagKey<Block> tag = TagKey.create(Registries.BLOCK, ResourceLocation.parse(GsonHelper.getAsString(json, "tag")));
         return (entity, level, type, pos, random) -> level.getBlockState(pos.below()).is(tag);
     }
 
@@ -242,11 +242,9 @@ public class SpawnRestrictionTypes
     public static SpawnPredicate getMonster(JsonObject json)
     {
         final boolean anyLight = GsonHelper.getAsBoolean(json, "any_light", false);
-        return (entity, level, type, pos, rand) -> {
-            return entity instanceof Monster && anyLight
-                ? Monster.checkAnyLightMonsterSpawnRules((EntityType<? extends Monster>) entity.getType(), level, type, pos, rand)
-                : Monster.checkMonsterSpawnRules((EntityType<? extends Monster>) entity.getType(), level, type, pos, rand);
-        };
+        return (entity, level, type, pos, rand) -> entity instanceof Monster && anyLight
+            ? Monster.checkAnyLightMonsterSpawnRules((EntityType<? extends Monster>) entity.getType(), level, type, pos, rand)
+            : Monster.checkMonsterSpawnRules((EntityType<? extends Monster>) entity.getType(), level, type, pos, rand);
     }
 
 
@@ -294,7 +292,7 @@ public class SpawnRestrictionTypes
 
     private static SpawnRestrictionType register(String id, Function<JsonObject, SpawnPredicate> deserializer, boolean vanilla)
     {
-        return SpawnRestrictionType.register(vanilla ? new ResourceLocation(id) : EZSupervisor.identifier(id), new SpawnRestrictionType(deserializer));
+        return SpawnRestrictionType.register(vanilla ? ResourceLocation.parse(id) : EZSupervisor.identifier(id), new SpawnRestrictionType(deserializer));
     }
 
 }
