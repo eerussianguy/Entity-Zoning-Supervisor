@@ -8,13 +8,14 @@ import com.eerussianguy.ez_supervisor.common.ParsingUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 
-public record SpawnRestriction(List<SpawnPredicate> predicates, boolean wipeOriginal)
+public record SpawnRestriction(List<Named> predicates, boolean wipeOriginal)
 {
-    public static Map<EntityType<?>, SpawnRestriction> readAll(JsonArray array)
+    public static Map<Holder<EntityType<?>>, SpawnRestriction> readAll(JsonArray array)
     {
         return ParsingUtils.mapArrayMap(array, e -> create(e.getAsJsonObject()), e -> ParsingUtils.getAsEntity(e.getAsJsonObject()));
     }
@@ -29,16 +30,16 @@ public record SpawnRestriction(List<SpawnPredicate> predicates, boolean wipeOrig
         return map;
     }
 
-    public static List<SpawnPredicate> readPredicatesList(JsonObject json)
+    public static List<Named> readPredicatesList(JsonObject json)
     {
-        final List<SpawnPredicate> list = new ArrayList<>();
+        final List<Named> list = new ArrayList<>();
         final JsonArray predicates = GsonHelper.getAsJsonArray(json, "predicates");
         for (JsonElement element : predicates)
         {
             final JsonObject predicateJson = element.getAsJsonObject();
             final ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(predicateJson, "type"));
             final SpawnRestrictionType type = SpawnRestrictionType.getValueOrThrow(id);
-            list.add(type.deserializer().apply(predicateJson));
+            list.add(new Named(id, type.deserializer().apply(predicateJson)));
         }
         return list;
     }
@@ -48,4 +49,6 @@ public record SpawnRestriction(List<SpawnPredicate> predicates, boolean wipeOrig
         final boolean wipe = GsonHelper.getAsBoolean(json, "overwrite_mod_predicate", false);
         return new SpawnRestriction(readPredicatesList(json), wipe);
     }
+
+    public record Named(ResourceLocation id, SpawnPredicate predicate) {}
 }

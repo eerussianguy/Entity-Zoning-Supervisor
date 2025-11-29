@@ -24,6 +24,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -105,19 +106,22 @@ public class ParsingUtils
         return map;
     }
 
-    public static List<EntityType<?>> getAsEntityList(JsonObject json)
+    public static List<Holder<EntityType<?>>> getAsEntityList(JsonObject json)
     {
         return json.get("entity").isJsonPrimitive() ? List.of(getAsEntity(json)) : mapArray(json.getAsJsonArray("entity"), e -> getAsEntity(e.getAsString()));
     }
 
-    public static EntityType<?> getAsEntity(JsonObject json)
+    public static Holder<EntityType<?>> getAsEntity(JsonObject json)
     {
-        return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(GsonHelper.getAsString(json, "entity"))));
+        return BuiltInRegistries.ENTITY_TYPE
+            .getHolder(ResourceLocation.parse(GsonHelper.getAsString(json, "entity")))
+            .orElseThrow(() -> new JsonParseException("Entity type not found: " + GsonHelper.getAsString(json, "entity") + " in json " + json));
     }
 
-    public static EntityType<?> getAsEntity(String name)
+    public static Holder<EntityType<?>> getAsEntity(String name)
     {
-        return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(name)));
+        return BuiltInRegistries.ENTITY_TYPE.getHolder(ResourceLocation.parse(name))
+            .orElseThrow(() -> new JsonParseException("Entity type not found: " + name));
     }
 
     public static Item getAsItem(JsonObject json, String key, Item fallback)

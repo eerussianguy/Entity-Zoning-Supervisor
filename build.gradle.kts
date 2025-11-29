@@ -16,7 +16,7 @@ val tfcVersion: String = "4.0.1-beta"
 val patchouliVersion: String = "1.21.1-92-NEOFORGE"
 
 val modId: String = "ez_supervisor"
-val modVersion: String = "3.0.0"
+val modVersion: String = "3.0.1"
 val modJavaVersion: String = "21"
 val modDataOutput: String = "src/generated/resources"
 
@@ -39,8 +39,8 @@ neoForge {
 }
 
 base {
-    archivesName.set("TerraFirmaCraft-NeoForge-$minecraftVersion")
-    group = "net.dries007.tfc"
+    archivesName.set("EntityZoningSupervisor-NeoForge-$minecraftVersion")
+    group = "com.eerussianguy.entity_zoning_supervisor"
     version = modVersion
 }
 
@@ -84,8 +84,6 @@ neoForge {
         configureEach {
             // Only JBR allows enhanced class redefinition, so ignore the option for any other JDKs
             jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition", "-ea")
-            systemProperty("tfc.enableDebugSelfTests", "true")
-            systemProperty("neoforge.enabledGameTestNamespaces", "tfc")
         }
         register("client") {
             client()

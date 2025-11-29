@@ -8,7 +8,9 @@ import com.eerussianguy.ez_supervisor.EZSupervisor;
 import com.eerussianguy.ez_supervisor.common.data.LootFilter;
 import com.eerussianguy.ez_supervisor.common.data.SpawnPredicate;
 import com.eerussianguy.ez_supervisor.common.data.SpawnRestriction;
+import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -17,8 +19,10 @@ import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class ForgeEvents
 {
@@ -28,7 +32,20 @@ public class ForgeEvents
         final IEventBus bus = NeoForge.EVENT_BUS;
 
         bus.addListener(EventPriority.LOW, ForgeEvents::onCheckSpawn);
+        bus.addListener(EventPriority.LOW, ForgeEvents::onCheckSpawnPlacement);
         bus.addListener(EventPriority.LOW, ForgeEvents::onEntityLoot);
+        bus.addListener(ForgeEvents::registerCommands);
+    }
+
+    public static void onCheckSpawnPlacement(MobSpawnEvent.SpawnPlacementCheck event)
+    {
+        final SpawnRestriction restriction = getSpawnRestriction(event.getEntityType());
+        if (restriction == null)
+            return;
+        if (restriction.wipeOriginal())
+        {
+            event.setResult(MobSpawnEvent.SpawnPlacementCheck.Result.SUCCEED);
+        }
     }
 
     public static void onCheckSpawn(MobSpawnEvent.PositionCheck event)
@@ -36,21 +53,30 @@ public class ForgeEvents
         var server = event.getLevel();
         {
             final LivingEntity entity = event.getEntity();
-            final SpawnRestriction restriction = Objects.requireNonNull(EZSupervisor.restrictions).get(entity.getType());
-            if (restriction != null)
+            final SpawnRestriction restriction = getSpawnRestriction(entity.getType());
+            if (restriction == null)
+                return;
+            final List<SpawnRestriction.Named> predicates = restriction.predicates();
+            for (var named : predicates)
             {
-                final List<SpawnPredicate> predicates = restriction.predicates();
-                for (SpawnPredicate predicate : predicates)
+                if (!named.predicate().test(entity, server, event.getSpawnType(), entity.blockPosition(), entity.getRandom()))
                 {
-                    if (!predicate.test(entity, server, event.getSpawnType(), entity.blockPosition(), entity.getRandom()))
-                    {
-                        event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
-                        break;
-                    }
+                    event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
+                    break;
                 }
             }
-
         }
+    }
+
+    @Nullable
+    private static SpawnRestriction getSpawnRestriction(EntityType<?> type)
+    {
+        assert EZSupervisor.restrictions != null;
+        return EZSupervisor.restrictions.keySet().stream().filter(key -> key.value().equals(type)).findFirst().map(key -> {
+            final SpawnRestriction restriction = EZSupervisor.restrictions.get(key);
+            assert restriction != null;
+            return restriction;
+        }).orElse(null);
     }
 
     public static void onEntityLoot(LivingDropsEvent event)
@@ -71,7 +97,7 @@ public class ForgeEvents
                         deadEntity.spawnAtLocation(new ItemStack(filter.output(), Mth.ceil(filter.outputMultiplier())));
                     }
                 }
-                else if ((filter.entities().isEmpty() || filter.entities().contains(entity.getType())) && filter.ingredient().test(stack))
+                else if ((filter.entities().isEmpty() || filter.entities().stream().map(Holder::value).anyMatch(e -> e.equals(entity.getType()))) && filter.ingredient().test(stack))
                 {
                     if (!filter.killedByPlayer() || (event.getSource().getEntity() instanceof Player))
                     {
@@ -85,5 +111,10 @@ public class ForgeEvents
                 }
             });
         }
+    }
+
+    public static void registerCommands(RegisterCommandsEvent event)
+    {
+        EZSCommands.registerCommands(event.getDispatcher(), event.getBuildContext());
     }
 }

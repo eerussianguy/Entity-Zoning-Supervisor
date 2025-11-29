@@ -8,6 +8,7 @@ import com.eerussianguy.ez_supervisor.common.ParsingUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -66,11 +67,11 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getOr(JsonObject json)
     {
-        final List<SpawnPredicate> predicates = SpawnRestriction.readPredicatesList(json);
+        final List<SpawnRestriction.Named> predicates = SpawnRestriction.readPredicatesList(json);
         return (entity, level, type, pos, random) -> {
-            for (SpawnPredicate predicate : predicates)
+            for (var named : predicates)
             {
-                if (predicate.test(entity, level, type, pos, random))
+                if (named.predicate().test(entity, level, type, pos, random))
                 {
                     return true;
                 }
@@ -81,11 +82,11 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getAnd(JsonObject json)
     {
-        final List<SpawnPredicate> predicates = SpawnRestriction.readPredicatesList(json);
+        final List<SpawnRestriction.Named> predicates = SpawnRestriction.readPredicatesList(json);
         return (entity, level, type, pos, random) -> {
-            for (SpawnPredicate predicate : predicates)
+            for (var named : predicates)
             {
-                if (!predicate.test(entity, level, type, pos, random))
+                if (!named.predicate().test(entity, level, type, pos, random))
                 {
                     return false;
                 }
@@ -96,11 +97,11 @@ public class SpawnRestrictionTypes
 
     public static SpawnPredicate getCopy(JsonObject json)
     {
-        final EntityType<?> toCopy = ParsingUtils.getAsEntity(json);
+        final Holder<EntityType<?>> toCopy = ParsingUtils.getAsEntity(json);
         return (entity, level, type, pos, random) -> {
-            for (SpawnPredicate predicate : Objects.requireNonNull(EZSupervisor.restrictions).get(toCopy).predicates())
+            for (SpawnRestriction.Named named : Objects.requireNonNull(EZSupervisor.restrictions).get(toCopy).predicates())
             {
-                if (!predicate.test(entity, level, type, pos, random))
+                if (!named.predicate().test(entity, level, type, pos, random))
                 {
                     return false;
                 }
@@ -118,7 +119,7 @@ public class SpawnRestrictionTypes
     public static SpawnPredicate getRuleSet(JsonObject json)
     {
         final SpawnRestriction restriction = Objects.requireNonNull(EZSupervisor.ruleSets).get(GsonHelper.getAsString(json, "rule"));
-        return (entity, level, type, pos, random) -> restriction.predicates().stream().allMatch(p -> p.test(entity, level, type, pos, random));
+        return (entity, level, type, pos, random) -> restriction.predicates().stream().allMatch(p -> p.predicate().test(entity, level, type, pos, random));
     }
 
     public static SpawnPredicate getSpawnType(JsonObject json)

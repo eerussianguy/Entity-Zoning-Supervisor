@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.Holder;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -13,7 +14,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
 
-public record LootFilter(List<EntityType<?>> entities, @Nullable Ingredient ingredient, Item output, float outputMultiplier, boolean killedByPlayer)
+public record LootFilter(List<Holder<EntityType<?>>> entities, @Nullable Ingredient ingredient, Item output, float outputMultiplier, boolean killedByPlayer)
 {
     public static List<LootFilter> readAll(JsonArray array)
     {
@@ -22,7 +23,7 @@ public record LootFilter(List<EntityType<?>> entities, @Nullable Ingredient ingr
 
     public static LootFilter create(JsonObject json)
     {
-        final List<EntityType<?>> type = json.has("entity") ? ParsingUtils.getAsEntityList(json) : List.of();
+        final List<Holder<EntityType<?>>> type = json.has("entity") ? ParsingUtils.getAsEntityList(json) : List.of();
         final Ingredient ingredient;
         if (json.has("ingredient"))
         {

@@ -4,6 +4,7 @@ import com.eerussianguy.ez_supervisor.EZSupervisor;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.neoforged.neoforge.common.world.BiomeModifier;
@@ -25,11 +26,12 @@ public record SpawnModifierProvider() implements BiomeModifier
         {
             assert EZSupervisor.spawns != null;
             EZSupervisor.spawns.forEach(spawn -> {
-                if (spawn.biomes().isEmpty() || spawn.biomes().contains(biome.unwrapKey().get().location()))
+                final ResourceLocation biomeKey = biome.unwrapKey().get().location();
+                if (spawn.biomes().isEmpty() || spawn.biomes().contains(biomeKey))
                 {
-                    LOGGER.debug("Adding spawn {} to biome {}", spawn.types(), biome.unwrapKey().get().location());
+                    LOGGER.debug("Adding spawn {} to biome {}", spawn.types(), biomeKey);
                     spawn.types().forEach(entity -> {
-                        spawns.addSpawn(entity.getCategory(), new MobSpawnSettings.SpawnerData(entity, spawn.weight(), spawn.minCount(), spawn.maxCount()));
+                        spawns.addSpawn(entity.value().getCategory(), new MobSpawnSettings.SpawnerData(entity.value(), spawn.weight(), spawn.minCount(), spawn.maxCount()));
                     });
                 }
             });

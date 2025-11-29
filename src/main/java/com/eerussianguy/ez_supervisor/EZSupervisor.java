@@ -14,6 +14,7 @@ import com.eerussianguy.ez_supervisor.common.data.SpawnRestrictionTypes;
 import com.eerussianguy.ez_supervisor.compat.TFCIntegration;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
@@ -38,7 +39,7 @@ public class EZSupervisor
 
     @Nullable public static File configDir = null;
     @Nullable public static List<BiomeSpawn> spawns = null;
-    @Nullable public static Map<EntityType<?>, SpawnRestriction> restrictions = null;
+    @Nullable public static Map<Holder<EntityType<?>>, SpawnRestriction> restrictions = null;
     @Nullable public static Map<String, SpawnRestriction> ruleSets = null;
     @Nullable public static List<LootFilter> entityLootFilters = null;
     public static boolean tfc = false;
