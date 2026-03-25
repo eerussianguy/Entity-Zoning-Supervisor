@@ -55,7 +55,7 @@ public class SpawnRestrictionTypes
     public static final SpawnRestrictionType RULE_SET = register("rule_set", SpawnRestrictionTypes::getRuleSet);
     public static final SpawnRestrictionType BIOME_TAG = register("biome_tag", SpawnRestrictionTypes::getBiomeTag);
     public static final SpawnRestrictionType OR = register("or", SpawnRestrictionTypes::getOr);
-    public static final SpawnRestrictionType AND = register("and", SpawnRestrictionTypes::getOr);
+    public static final SpawnRestrictionType AND = register("and", SpawnRestrictionTypes::getAnd);
     public static final SpawnRestrictionType COPY = register("copy", SpawnRestrictionTypes::getCopy);
 
     // Vanilla

@@ -7,7 +7,7 @@ plugins {
 
 // Toolchain versions
 val minecraftVersion: String = "1.21.1"
-val neoForgeVersion: String = "21.1.197"
+val neoForgeVersion: String = "21.1.216"
 val parchmentVersion: String = "2024.11.17"
 val parchmentMinecraftVersion: String = "1.21.1"
 val tfcVersion: String = "4.0.1-beta"
@@ -16,7 +16,7 @@ val tfcVersion: String = "4.0.1-beta"
 val patchouliVersion: String = "1.21.1-92-NEOFORGE"
 
 val modId: String = "ez_supervisor"
-val modVersion: String = "3.0.1"
+val modVersion: String = "3.0.2"
 val modJavaVersion: String = "21"
 val modDataOutput: String = "src/generated/resources"
 
@@ -126,7 +126,7 @@ dependencies {
     runtimeOnly(group = "curse.maven", name = "modernfix-790626", version = "6766126")
 
     // TFC
-    implementation(group = "curse.maven", name = "terrafirmacraft-302973", version = "6998336")
+    implementation(group = "curse.maven", name = "terrafirmacraft-302973", version = "7634816")
 
     // Data
     "dataImplementation"(sourceSets["main"].output)

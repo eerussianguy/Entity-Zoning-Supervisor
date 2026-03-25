@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.Set;
 import com.eerussianguy.ez_supervisor.EZSupervisor;
 import com.eerussianguy.ez_supervisor.common.data.LootFilter;
-import com.eerussianguy.ez_supervisor.common.data.SpawnPredicate;
 import com.eerussianguy.ez_supervisor.common.data.SpawnRestriction;
 import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
@@ -51,19 +50,17 @@ public class ForgeEvents
     public static void onCheckSpawn(MobSpawnEvent.PositionCheck event)
     {
         var server = event.getLevel();
+        final LivingEntity entity = event.getEntity();
+        final SpawnRestriction restriction = getSpawnRestriction(entity.getType());
+        if (restriction == null)
+            return;
+        final List<SpawnRestriction.Named> predicates = restriction.predicates();
+        for (var named : predicates)
         {
-            final LivingEntity entity = event.getEntity();
-            final SpawnRestriction restriction = getSpawnRestriction(entity.getType());
-            if (restriction == null)
-                return;
-            final List<SpawnRestriction.Named> predicates = restriction.predicates();
-            for (var named : predicates)
+            if (!named.predicate().test(entity, server, event.getSpawnType(), entity.blockPosition(), entity.getRandom()))
             {
-                if (!named.predicate().test(entity, server, event.getSpawnType(), entity.blockPosition(), entity.getRandom()))
-                {
-                    event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
-                    break;
-                }
+                event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
+                break;
             }
         }
     }

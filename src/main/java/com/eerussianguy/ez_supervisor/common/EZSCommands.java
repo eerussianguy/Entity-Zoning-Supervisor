@@ -1,7 +1,6 @@
 package com.eerussianguy.ez_supervisor.common;
 
 import com.eerussianguy.ez_supervisor.EZSupervisor;
-import com.eerussianguy.ez_supervisor.common.data.SpawnRestriction;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.ChatFormatting;
